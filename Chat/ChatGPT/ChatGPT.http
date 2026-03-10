@@ -1,0 +1,6 @@
+@ChatGPT_HostAddress = http://localhost:5208
+
+GET {{ChatGPT_HostAddress}}/chat/
+Accept: application/json
+
+###
