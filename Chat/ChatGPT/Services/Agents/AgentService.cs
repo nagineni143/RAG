@@ -8,13 +8,17 @@ public class AgentService
 
     private readonly AgentMemory _memory = new();
     private readonly SessionMemoryStore _sessionStore;
+    private readonly McpClient _mcpClient;
 
-    public AgentService(ILLMClient llm, ToolRegistry toolRegistry, PlannerService plannerService, SessionMemoryStore sessionMemory)
+    public AgentService(ILLMClient llm, ToolRegistry toolRegistry,
+    PlannerService plannerService, SessionMemoryStore sessionMemory,
+    McpClient mcpClient)
     {
         _llm = llm;
         _toolRegistry = toolRegistry;
         _planner = plannerService;
         _sessionStore = sessionMemory;
+        _mcpClient = mcpClient;
     }
 
     public async Task<string> RunAsync(string sessionId, string userPrompt)
@@ -140,13 +144,8 @@ public class AgentService
                     return toolCall.FinalAnswer ?? "No answer.";
                 }
 
-                var tool = _toolRegistry.Get(toolCall.Tool);
-
-                if (tool == null)
-                    return "Unknown tool.";
-
-                var toolResult = await tool.ExecuteAsync(input);
-                _memory.AddObservation(toolResult);
+                var toolResult = await _mcpClient.ExecuteTool(toolCall.Tool, input);
+                _memory.AddObservation(JsonSerializer.Serialize(toolResult));
 
                 messages.Add(new Message
                 {

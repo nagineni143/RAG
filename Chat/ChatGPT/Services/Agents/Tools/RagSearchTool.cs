@@ -17,7 +17,7 @@ public class RagSearchTool : ITool
             query = "string (search query for internal documents)"
         };
     }
-    public async Task<string> ExecuteAsync(JsonElement input)
+    public async Task<object> ExecuteAsync(JsonElement input)
     {
         string query = "";
 
@@ -30,6 +30,9 @@ public class RagSearchTool : ITool
 
         var docs = await _retriever.RetrieveAsync(query);
 
-        return string.Join("\n\n", docs.Select(d => d.Content));
+        return new
+        {
+            results = docs.Select(d => d.Content)
+        };
     }
 }

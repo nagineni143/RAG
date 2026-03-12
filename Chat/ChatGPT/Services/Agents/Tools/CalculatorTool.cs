@@ -1,5 +1,6 @@
 using System.Data;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 public class CalculatorTool : ITool
 {
@@ -16,18 +17,26 @@ public class CalculatorTool : ITool
         };
     }
 
-    public Task<string> ExecuteAsync(JsonElement input)
+    public Task<object> ExecuteAsync(JsonElement input)
     {
         try
         {
-            var query = input.GetProperty("expression").GetString();
-            var result = new DataTable().Compute(query, null);
+            var expression = input.GetProperty("expression").GetString();
 
-            return Task.FromResult(result.ToString() ?? "0");
+            expression = Regex.Replace(expression, @"[^\d\+\-\*/\(\)]", "");
+            var result = new DataTable().Compute(expression, null);
+
+            return Task.FromResult<object>(new
+            {
+                result = result?.ToString()
+            });
         }
         catch
         {
-            return Task.FromResult("Invalid mathematical expression.");
+            return Task.FromResult<object>(new
+            {
+                error = "Invalid mathematical expression."
+            });
         }
     }
 }
