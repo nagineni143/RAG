@@ -1,6 +1,9 @@
+using System.Text.Json;
+
 public interface ITool
 {
     string Name { get; }
     string Description { get; }
-    Task<string> ExecuteAsync(string input);
+    object GetSchema();
+    Task<string> ExecuteAsync(JsonElement input);
 }

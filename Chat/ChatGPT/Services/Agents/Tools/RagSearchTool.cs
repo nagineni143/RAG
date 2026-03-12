@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 public class RagSearchTool : ITool
 {
     private readonly IRetriever _retriever;
@@ -7,12 +9,26 @@ public class RagSearchTool : ITool
     }
     public string Name => "rag_search";
     public string Description => "Searches internal documents for relevant information.";
-    public async Task<string> ExecuteAsync(string input)
-    {
-        var docs = await _retriever.RetrieveAsync(input);
 
-        if (!docs.Any())
-            return "No relevant documents found.";
+    public object GetSchema()
+    {
+        return new
+        {
+            query = "string (search query for internal documents)"
+        };
+    }
+    public async Task<string> ExecuteAsync(JsonElement input)
+    {
+        string query = "";
+
+        if (input.ValueKind == JsonValueKind.String)
+            query = input.GetString();
+
+        else if (input.ValueKind == JsonValueKind.Object &&
+                 input.TryGetProperty("query", out var q))
+            query = q.GetString();
+
+        var docs = await _retriever.RetrieveAsync(query);
 
         return string.Join("\n\n", docs.Select(d => d.Content));
     }

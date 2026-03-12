@@ -11,8 +11,11 @@ builder.Services.AddSingleton<IVectorStore, InMemoryVectorStore>();
 builder.Services.AddSingleton<IReRanker, SimpleReRanker>();
 builder.Services.AddSingleton<IRetriever, VectorRetriever>();
 builder.Services.AddSingleton<ITool, RagSearchTool>();
+builder.Services.AddSingleton<ITool, CalculatorTool>();
+builder.Services.AddScoped<PlannerService>();
+builder.Services.AddSingleton<SessionMemoryStore>();
 builder.Services.AddSingleton<ToolRegistry>();
-builder.Services.AddSingleton<AgentService>();
+builder.Services.AddScoped<AgentService>();
 builder.Services.AddSingleton<IMemoryManager, SlidingWindowMemoryManager>();
 builder.Services.AddSingleton<IConversationStore, ConversationStore>();
 builder.Services.AddSingleton<ITextChunker, OverlappingTextChunker>();
@@ -63,9 +66,9 @@ app.MapPost("/chat", async (Request request, IChatService _chatService) =>
 })
 .WithName("Chat");
 
-app.MapPost("/agent", async (AgentService agent, UserRequest request) =>
+app.MapPost("/agent", async (AgentService agent, string sessionId, UserRequest request) =>
 {
-    return await agent.RunAsync(request.Message);
+    return await agent.RunAsync(sessionId, request.Message);
 })
 .WithName("Agent");
 

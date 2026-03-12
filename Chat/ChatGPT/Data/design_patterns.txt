@@ -44,3 +44,5 @@ for algorithm selection, and the Singleton pattern for shared configuration mana
 
 Understanding design patterns is a critical skill for backend engineers, system architects, 
 and software developers who want to build robust and maintainable software systems.
+
+The Population is 4000
