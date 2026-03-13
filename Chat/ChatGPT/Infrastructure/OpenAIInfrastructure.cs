@@ -6,7 +6,7 @@ public class OpenAIInfrastructure
 
     public OpenAIInfrastructure(IConfiguration config)
     {
-        var apiKey = config["OPENAI_API_KEY"];
+        var apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
         Client = new OpenAIClient(apiKey);
     }
 }

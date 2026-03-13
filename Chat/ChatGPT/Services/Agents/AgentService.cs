@@ -30,37 +30,8 @@ public class AgentService
             $"{t.Name}:\nDescription: {t.Description}\nSchema: {JsonSerializer.Serialize(t.GetSchema())}"));
 
         var history = _sessionStore.GetSession(sessionId);
-        var messages = new List<Message>
-        {
-            new Message
-            {
-                Role = "system",
-                Content = """
-                You are an AI agent that can use tools to answer questions.
 
-                Thought: decide what to do
-                Action: call a tool
-                Observation: read the tool result
-                Repeat until you can answer.
-
-                Available tools:
-                """ + toolSchemas + """
-
-                When a tool is needed, respond ONLY with JSON in this format:
-                { "tool": "tool_name", "input": "tool input" }
-                When you have enough information to answer the user, respond with:
-                { "tool": "none", "final_answer": "your answer" }
-
-                Rules:
-                - Do not include explanations outside the JSON.
-                - Do not include markdown.
-                - Always return valid JSON.
-
-                Use tools when external information or computation is required.
-                """
-            }
-        };
-
+        var messages = BuildSystemPrompt(toolSchemas);
         messages.AddRange(history);
         messages.Add(new Message
         {
@@ -168,5 +139,40 @@ public class AgentService
 
         return "Agent reached step limit.";
 
+    }
+
+    private List<Message> BuildSystemPrompt(string toolSchemas)
+    {
+        var messages = new List<Message>
+        {
+            new Message
+            {
+                Role = "system",
+                Content = """
+                You are an AI agent that can use tools to answer questions.
+
+                Thought: decide what to do
+                Action: call a tool
+                Observation: read the tool result
+                Repeat until you can answer.
+
+                Available tools:
+                """ + toolSchemas + """
+
+                When a tool is needed, respond ONLY with JSON in this format:
+                { "tool": "tool_name", "input": "tool input" }
+                When you have enough information to answer the user, respond with:
+                { "tool": "none", "final_answer": "your answer" }
+
+                Rules:
+                - Do not include explanations outside the JSON.
+                - Do not include markdown.
+                - Always return valid JSON.
+
+                Use tools when external information or computation is required.
+                """
+            }
+        };
+        return messages;
     }
 }
