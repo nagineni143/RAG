@@ -32,7 +32,7 @@ public class ChatService : IChatService
         _memoryBuilder.BuildPromptMemory(history, userMessage);
 
         // 3. Compose final prompt with system message
-        var retrievedDocs = await _retriever.RetrieveAsync(userPrompt)b;
+        var retrievedDocs = await _retriever.RetrieveAsync(userPrompt);
         string contextBlock;
         if (!retrievedDocs.Any())
         {
